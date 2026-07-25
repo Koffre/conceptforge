@@ -1,0 +1,138 @@
+# Entorno virtual
+.venv/
+venv/
+ENV/
+env/
+
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de entorno y secretos
+.env
+*.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.env
+*.env
+*.env.local
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Project specific
+temp/
+tmp/
+uploads/
+documents/
+*.log
+*.tmp
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pyenv
+.python-version
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+*.pid
+*.lock
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Local development overrides
+*.local
+
+# Compiled documentation
+docs/_build/
+
+# Coverage files
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# mkdocs documentation
+site/
+
+# Rope
+.ropeproject/
+
+# Vim swap files
+*.swp
+*.swo
+.*.swp
+.*.swo
+
+# Node modules (just in case)
+node_modules/
+
+# Docker
+*.pid
+*.pid.lock
