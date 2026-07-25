@@ -4,11 +4,11 @@
 
 ## Features
 
-- 📄 **Document Upload**: Upload PDF files for analysis
-- 🔍 **Semantic Search**: Find relevant information using natural language queries
-- 📝 **Smart Summaries**: Generate concise summaries of documents
-- 🧠 **Concept Mapping**: Automatically extract key concepts and visualize relationships
-- 💬 **Chat Interface**: Interact with your documents through a user-friendly chat
+- **Document Upload**: Upload PDF files for analysis
+- **Semantic Search**: Find relevant information using natural language queries
+- **Smart Summaries**: Generate concise summaries of documents
+- **Concept Mapping**: Automatically extract key concepts and visualize relationships
+- **Chat Interface**: Interact with your documents through a user-friendly chat
 
 ## Architecture
 
@@ -40,8 +40,14 @@ ConceptForge is built using a multi-agent system architecture:
 1. **Clone the repository:**
    
    git clone https://github.com/Koffre/conceptforge.git
+
+2. Crea un entorno virtual: `uv venv`
    
+3. Activa el entorno: `source .venv/Scripts/activate`
    
+5. Instala las dependencias: `uv pip install -r requirements.txt`
+   
+7. Configura tu `.env` con la `GOOGLE_API_KEY`  
    
 ## Project Structure
 
