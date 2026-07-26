@@ -46,14 +46,14 @@ User → Streamlit Interface → LangChain Agent → MCP Server → RAG Engine �
    
    git clone https://github.com/Koffre/conceptforge.git
 
-2. Crea un entorno virtual: `uv venv`
+2. Create a virtual environment: `uv venv`
    
-3. Activa el entorno: `source .venv/Scripts/activate`
+3. Activate the environment: `source .venv/Scripts/activate`
    
-5. Instala las dependencias: `uv pip install -r requirements.txt`
+5. Install dependencies: `uv pip install -r requirements.txt`
    
-7. Configura tu `.env` con la `GOOGLE_API_KEY`  
-
+6. Configure environment variables: 
+   Create a .env file in the root directory and add your key
 
 ## Usage
 
@@ -82,15 +82,25 @@ Open http://localhost:8501 in your browser.
 
 conceptforge/
 ├── src/
+
 │   ├── __init__.py          # Package exports
+
 │   ├── rag_engine.py        # RAG Engine
+
 │   ├── mcp_server.py        # MCP Server
+
 │   ├── agent.py             # Agent configuration
+
 │   └── main.py              # Streamlit interface
+
 ├── samples/                 # Sample PDFs
+
 ├── .env                     # Environment variables
+
 ├── .gitignore               # Ignored files
+
 ├── README.md                # Project documentation
+
 └── requirements.txt         # Python dependencies
 
 
