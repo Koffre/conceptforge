@@ -53,17 +53,31 @@ ConceptForge is built using a multi-agent system architecture:
 
 conceptforge/
 ├── src/
-│   ├── main.py              # Streamlit interface entry point
-│   ├── agent.py             # Agent configuration and tools
-│   ├── rag_engine.py        # RAG pipeline (loading, splitting, embeddings)
-│   ├── concept_mapper.py    # Concept extraction and relationship mapping
-│   ├── prompts.py           # System prompts for agents
-│   └── utils.py             # Helper functions
+│   ├── __init__.py
+│   ├── rag_engine.py        # RAG Engine
+│   ├── mcp_server.py        # MCP Server
+│   ├── agent.py             # Agent
+│   └── main.py   
+├── samples/
+│   └── Web incentives in Ghana - Meuleman, Langer & Blom 2017 SSCR.pdf
 ├── temp/                    # Temporary file storage
 ├── .env                     # Environment variables (not in repo)
 ├── .gitignore               # Ignored files
 ├── README.md                # Project documentation
 └── requirements.txt         # Python dependencies
+
+
+## Future Enhancements
+
+- Support for additional document formats (DOCX, TXT, HTML)
+
+- Multi-document analysis and comparison
+
+- Export concept maps as images or markdown
+
+- Integration with Tavily for web search
+
+- Persistent vector store for long-term memory
 
 
 ## Author
