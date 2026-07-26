@@ -1,23 +1,28 @@
-# ConceptForge
+# ⚙️ ConceptForge
 
-**ConceptForge** is an intelligent research assistant that transforms documents into structured knowledge. It combines Retrieval-Augmented Generation (RAG) with AI-powered concept mapping to help you read, understand, and synthesize information.
+**ConceptForge** is an intelligent research assistant that combines RAG (Retrieval-Augmented Generation) with MCP (Model Context Protocol) to help you analyze documents, extract insights, and visualize knowledge.
 
-## Features
+## 🎯 Features
 
-- **Document Upload**: Upload PDF files for analysis
-- **Semantic Search**: Find relevant information using natural language queries
-- **Smart Summaries**: Generate concise summaries of documents
-- **Concept Mapping**: Automatically extract key concepts and visualize relationships
-- **Chat Interface**: Interact with your documents through a user-friendly chat
+- 📄 **Document Upload** – Load PDF documents for analysis
+- 🔍 **Semantic Search** – Find relevant information using natural language
+- 📝 **Smart Summarization** – Generate concise document summaries
+- 🧠 **Concept Mapping** – Visualize key concepts and relationships in Mermaid format
+- 💬 **Conversational AI** – Interact with your documents through a chat interface
 
-## Architecture
 
-ConceptForge is built using a multi-agent system architecture:
+## 🏗️ Architecture
 
-- **RAG Engine**: Indexes documents for semantic search using embeddings
-- **Research Agent**: Handles queries and document interactions
-- **Concept Mapper**: Extracts concepts and relationships from documents
-- **Orchestrator**: Coordinates between agents and manages conversation state
+User → Streamlit Interface → LangChain Agent → MCP Server → RAG Engine → Document Index
+
+### Components
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **RAG Engine** | LangChain, Gemini Embeddings | Document processing and semantic search |
+| **MCP Server** | FastMCP | Exposes tools via Model Context Protocol |
+| **Agent** | LangChain | Orchestrates conversation and tool usage |
+| **Interface** | Streamlit | Web-based chat interface |
 
 ## Technologies
 
@@ -27,13 +32,13 @@ ConceptForge is built using a multi-agent system architecture:
 - [Streamlit](https://streamlit.io/) — Web interface for the chat application
 - [uv](https://github.com/astral-sh/uv) — Fast Python package management
 
-## Installation
+### Installation
 
-### Prerequisites
+## Prerequisites
 
-- Python 3.12 or higher
-- [uv](https://github.com/astral-sh/uv) for Python package management
-- Google Gemini API key
+- Python 3.12+
+- Google Gemini API Key
+- uv (optional but recommended)
 
 ### Setup
 
@@ -48,38 +53,69 @@ ConceptForge is built using a multi-agent system architecture:
 5. Instala las dependencias: `uv pip install -r requirements.txt`
    
 7. Configura tu `.env` con la `GOOGLE_API_KEY`  
-   
+
+
+## Usage
+
+### Start the application
+streamlit run src/main.py
+Open http://localhost:8501 in your browser.
+
+### Example Workflow
+
+1. Upload a PDF document
+
+2. Wait for indexing (automatic)
+
+3. Ask questions:
+
+  "What is the main topic of this document?"
+
+  "Summarize the key findings"
+
+  "Generate a concept map"
+
+  "Find information about [specific topic]"
+
+
 ## Project Structure
 
 conceptforge/
 ├── src/
-│   ├── __init__.py
+│   ├── __init__.py          # Package exports
 │   ├── rag_engine.py        # RAG Engine
 │   ├── mcp_server.py        # MCP Server
-│   ├── agent.py             # Agent
-│   └── main.py   
-├── samples/
-│   └── Web incentives in Ghana - Meuleman, Langer & Blom 2017 SSCR.pdf
-├── temp/                    # Temporary file storage
-├── .env                     # Environment variables (not in repo)
+│   ├── agent.py             # Agent configuration
+│   └── main.py              # Streamlit interface
+├── samples/                 # Sample PDFs
+├── .env                     # Environment variables
 ├── .gitignore               # Ignored files
 ├── README.md                # Project documentation
 └── requirements.txt         # Python dependencies
 
 
-## Future Enhancements
+## 🔧 Configuration
+Create a .env file with your API keys:
 
-- Support for additional document formats (DOCX, TXT, HTML)
+GOOGLE_API_KEY=your_google_api_key_here
 
-- Multi-document analysis and comparison
+## 🤝 Contributing
+Contributions are welcome! Please open an issue or submit a pull request.
 
-- Export concept maps as images or markdown
 
-- Integration with Tavily for web search
-
-- Persistent vector store for long-term memory
+##📄 License
+This project is licensed under the MIT License.
 
 
 ## Author
 
-Joffre Sanchez 
+Joffre Sanchez  - https://github.com/Koffre
+
+
+## 🙏 Acknowledgments
+
+- LangChain community for the excellent framework
+
+- Google for Gemini API
+
+- Open-source community for the tools and libraries
