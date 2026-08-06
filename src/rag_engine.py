@@ -9,7 +9,9 @@ This module handles:
 - Performing semantic searches
 """
 
+import io
 import os
+import sys
 from typing import List, Optional
 
 from langchain_community.document_loaders import PyPDFLoader
@@ -19,6 +21,8 @@ from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
 
 from dotenv import load_dotenv
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 # Load environment variables
 load_dotenv()

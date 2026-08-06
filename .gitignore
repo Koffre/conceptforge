@@ -110,6 +110,7 @@ logs/
 
 # Compiled documentation
 docs/_build/
+uploads/
 
 # Coverage files
 .coverage

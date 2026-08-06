@@ -4,6 +4,7 @@ Agent module for ConceptForge.
 Connects to the MCP server and uses its tools.
 """
 
+import asyncio
 import os
 from typing import Optional
 from dataclasses import dataclass
@@ -47,14 +48,15 @@ class UserContext:
 # ============================================
 
 @before_agent
-def trim_tool_messages(state: ConceptForgeState) -> dict:
-    """Remove ToolMessage objects from the conversation history."""
+def trim_tool_messages(state: ConceptForgeState, runtime) -> dict:
+    """
+    Remove ToolMessage objects from the conversation history.
+    This keeps the conversation clean and reduces token usage.
+    """
     messages = state.get("messages", [])
     tool_messages = [m for m in messages if isinstance(m, ToolMessage)]
-    
     if tool_messages:
         return {"messages": [RemoveMessage(id=m.id) for m in tool_messages]}
-    
     return None
 
 
@@ -71,7 +73,7 @@ def create_conceptforge_agent():
         google_api_key=os.getenv("GOOGLE_API_KEY"),
         temperature=0.7
     )
-    
+
     # Connect to the MCP server
     mcp_client = MultiServerMCPClient(
         {
@@ -84,11 +86,17 @@ def create_conceptforge_agent():
     )
     
     # Discover tools from the MCP server
-    tools = mcp_client.get_tools()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     
-    # Get system prompt from MCP server
-    prompt_result = mcp_client.get_prompt("conceptforge", "conceptforge_prompt")
-    system_prompt = prompt_result[0].content
+    try:
+        tools = loop.run_until_complete(mcp_client.get_tools())
+        prompt_result = loop.run_until_complete(mcp_client.get_prompt("conceptforge", "conceptforge_prompt"))
+        system_prompt = prompt_result[0].content
+    finally:
+        loop.close()
+        asyncio.set_event_loop(None)
+        
     
     # Create the agent
     agent = create_agent(
