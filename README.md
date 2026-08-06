@@ -101,17 +101,29 @@ The agent will respond with relevant information, summaries, or Mermaid diagrams
 ## 📁 Project Structure
 
 conceptforge/
+
 ├── src/
+
 │   ├── __init__.py          # Package exports
+
 │   ├── rag_engine.py        # RAG Engine (PDF loading, splitting, embeddings)
+
 │   ├── mcp_server.py        # MCP Server (tools exposed via MCP)
+
 │   ├── agent.py             # Agent configuration and middleware
+
 │   └── main.py              # Streamlit interface entry point
+
 ├── samples/                 # Sample PDF documents
+
 ├── docs/                    # Documentation and screenshots (optional)
+
 ├── .env                     # Environment variables (not in repo)
+
 ├── .gitignore               # Ignored files
+
 ├── README.md                # Project documentation
+
 └── requirements.txt         # Python dependencies
 
 
