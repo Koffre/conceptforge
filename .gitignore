@@ -1,139 +1,149 @@
-# Entorno virtual
-.venv/
-venv/
-ENV/
-env/
+# ============================================
+# ENVIRONMENT & SECRETS
+# ============================================
 
-# Archivos de Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Archivos de entorno y secretos
 .env
+.env.*
 *.env
 *.env.local
+*.env.*.local
 
-# Python
+
+# ============================================
+# PYTHON
+# ============================================
+
 __pycache__/
 *.py[cod]
 *.so
 *.egg
 *.egg-info/
+
 dist/
 build/
-*.pyc
-*.pyo
-*.pyd
 
-# Virtual environments
+
+# ============================================
+# VIRTUAL ENVIRONMENTS
+# ============================================
+
 .venv/
 venv/
 ENV/
 env/
-.env
-*.env
-*.env.local
 
-# IDE and editors
+
+# ============================================
+# IDE & EDITORS
+# ============================================
+
 .vscode/
 .idea/
 *.swp
 *.swo
-.DS_Store
+.*.swp
+.*.swo
 *.sublime-project
 *.sublime-workspace
 
-# Project specific
-temp/
-tmp/
+
+# ============================================
+# LOCAL PROJECT DATA
+# ============================================
+
 uploads/
 documents/
-*.log
-*.tmp
+
+# Persistent ChromaDB vector store
+chroma_db/
+
+# Active document state
+active_document.json
+
+
+# ============================================
+# DATABASES & LOCAL STORAGE
+# ============================================
+
 *.db
 *.sqlite
 *.sqlite3
 
-# Jupyter Notebooks
+
+# ============================================
+# LOGS & TEMPORARY FILES
+# ============================================
+
+*.log
+*.tmp
+*.local
+
+temp/
+tmp/
+logs/
+
+
+# ============================================
+# JUPYTER
+# ============================================
+
 .ipynb_checkpoints/
 *.ipynb
 
-# Unit test / coverage reports
-htmlcov/
+
+# ============================================
+# TESTING & COVERAGE
+# ============================================
+
+.pytest_cache/
+.hypothesis/
 .tox/
+htmlcov/
+
 .coverage
 .coverage.*
-.cache
-nosetests.xml
-coverage.xml
 *.cover
+coverage.xml
+nosetests.xml
 
-# MyPy
+
+# ============================================
+# TYPE CHECKING
+# ============================================
+
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
-# Pyre type checker
 .pyre/
 
-# pyenv
-.python-version
 
-# MacOS
+# ============================================
+# OS
+# ============================================
+
 .DS_Store
 .AppleDouble
 .LSOverride
 
-# Windows
 Thumbs.db
 ehthumbs.db
 Desktop.ini
-
-# Linux
 .directory
 *.pid
-*.lock
+*.pid.lock
 
-# Environment variables
-.env
-.env.local
-.env.*.local
 
-# Logs
-logs/
-*.log
+# ============================================
+# DOCUMENTATION BUILD
+# ============================================
 
-# Local development overrides
-*.local
-
-# Compiled documentation
 docs/_build/
-uploads/
-
-# Coverage files
-.coverage
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# mkdocs documentation
 site/
 
-# Rope
+
+# ============================================
+# OTHER
+# ============================================
+
 .ropeproject/
-
-# Vim swap files
-*.swp
-*.swo
-.*.swp
-.*.swo
-
-# Node modules (just in case)
 node_modules/
-
-# Docker
-*.pid
-*.pid.lock

@@ -1,60 +1,56 @@
-# src/main.py
-"""
-Streamlit interface for ConceptForge.
 
-This module provides a chat interface that connects to the ConceptForge agent.
+"""
+ConceptForge - Streamlit Application
+
+Main user interface for the ConceptForge research assistant.
 """
 
 import os
 import sys
-import tempfile
 import asyncio
-import nest_asyncio
 from pathlib import Path
 
 import streamlit as st
-from contextlib import contextmanager
+from dotenv import load_dotenv
 
-# Compatibility shims: implement missing Streamlit-like helpers if absent
-if not hasattr(st, "divider"):
-    def divider():
-        st.markdown("---")
-    st.divider = divider
-
-if not hasattr(st, "chat_input"):
-    def chat_input(prompt: str):
-        # Fallback to a simple text_input for environments without chat_input
-        return st.text_input(prompt, key="_chat_input")
-    st.chat_input = chat_input
-
-if not hasattr(st, "chat_message"):
-    @contextmanager
-    def chat_message(role: str):
-        # Provide a simple container context for chat messages
-        container = st.container()
-        with container:
-            yield
-    st.chat_message = chat_message
-
-# Add the project root to the path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-nest_asyncio.apply()
-
-from src.agent import get_agent
-from src.rag_engine import RAGEngine
-from langchain.messages import HumanMessage
 
 # ============================================
-# PAGE CONFIGURATION
+# PROJECT ROOT
+# ============================================
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
+# ============================================
+# IMPORTS
+# ============================================
+
+from src.rag_engine import RAGEngine
+from src.mcp_server import set_rag_engine
+from src.agent import get_agent
+
+
+# ============================================
+# ENVIRONMENT
+# ============================================
+
+load_dotenv()
+
+
+# ============================================
+# STREAMLIT CONFIGURATION
 # ============================================
 
 st.set_page_config(
     page_title="ConceptForge",
-    page_icon="⚙️",
+    page_icon="🔬",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
 
 # ============================================
 # CUSTOM CSS
@@ -63,334 +59,765 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    .main-header {
-        font-size: 2.5rem;
+
+    /* ========================================
+       GLOBAL
+       ======================================== */
+
+    .stApp {
+        background-color: #f3f8f4;
+    }
+
+    .main {
+        background-color: #f3f8f4;
+    }
+
+    /* ========================================
+       HEADER
+       ======================================== */
+
+    .conceptforge-header {
+        background: linear-gradient(
+            135deg,
+            #dcefe3 0%,
+            #eef7f1 100%
+        );
+
+        padding: 28px 32px;
+        border-radius: 18px;
+        margin-bottom: 25px;
+
+        border: 1px solid #c8e1d1;
+
+        box-shadow:
+            0 4px 12px rgba(53, 94, 70, 0.06);
+    }
+
+    .conceptforge-title {
+        font-size: 2.4rem;
         font-weight: 700;
-        color: #1f77b4;
-        text-align: center;
-        margin-bottom: 0.5rem;
+        color: #234b35;
+        margin: 0;
+        letter-spacing: -0.5px;
     }
-    .sub-header {
-        font-size: 1.1rem;
-        color: #666;
-        text-align: center;
-        margin-bottom: 2rem;
+
+    .conceptforge-subtitle {
+        font-size: 1rem;
+        color: #557363;
+        margin-top: 6px;
     }
-    .status-box {
-        padding: 0.75rem;
-        border-radius: 0.5rem;
-        background-color: #f0f2f6;
-        margin: 0.5rem 0;
+
+    .microscope {
+        font-size: 2.5rem;
+        margin-right: 12px;
     }
-    .tool-header {
+
+    /* ========================================
+       ACTIVE DOCUMENT CARD
+       ======================================== */
+
+    .active-document {
+        background-color: #ffffff;
+
+        border-left: 5px solid #79a88b;
+
+        padding: 14px 18px;
+        border-radius: 10px;
+
+        margin-bottom: 20px;
+
+        box-shadow:
+            0 2px 8px rgba(40, 70, 50, 0.05);
+    }
+
+    .active-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #789084;
         font-weight: 600;
-        color: #1f77b4;
-        margin-top: 0.5rem;
     }
-    .stChatMessage {
-        padding: 1rem;
+
+    .active-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #294d38;
+        margin-top: 3px;
     }
-    /* Make sidebar narrower and cleaner */
+
+    /* ========================================
+       SIDEBAR
+       ======================================== */
+
     section[data-testid="stSidebar"] {
-        width: 280px !important;
-        min-width: 280px !important;
-        max-width: 280px !important;
-        padding: 1rem 0.5rem;
+        background-color: #e7f2ea;
+        border-right: 1px solid #cddfd2;
     }
-    
-    /* Hide the default sidebar collapse button if you want */
-    .stSidebarCollapseButton {
-        display: none !important;
+
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #294d38;
     }
-    
-    /* Better spacing for sidebar content */
-    .stSidebar .stMarkdown {
-        padding: 0 0.5rem;
+
+    /* ========================================
+       DOCUMENT LIST
+       ======================================== */
+
+    .document-item {
+        background-color: #f8fbf9;
+
+        border: 1px solid #d5e5da;
+
+        padding: 9px 12px;
+
+        border-radius: 8px;
+
+        margin-bottom: 6px;
+
+        font-size: 0.85rem;
+
+        color: #486353;
     }
+
+    .document-active {
+        background-color: #d9eddf;
+
+        border: 1px solid #a9cdb4;
+
+        color: #28523a;
+
+        font-weight: 600;
+    }
+
+    /* ========================================
+       CHAT
+       ======================================== */
+
+    [data-testid="stChatMessage"] {
+        border-radius: 12px;
+        margin-bottom: 10px;
+    }
+
+    /* ========================================
+       BUTTONS
+       ======================================== */
+
+    .stButton > button {
+        border-radius: 8px;
+
+        border: 1px solid #9dbca7;
+
+        background-color: #ffffff;
+
+        color: #31553e;
+
+        font-weight: 500;
+    }
+
+    .stButton > button:hover {
+        border-color: #6f9d7d;
+        color: #234b35;
+        background-color: #edf6ef;
+    }
+
+    /* ========================================
+       FILE UPLOADER
+       ======================================== */
+
+    [data-testid="stFileUploader"] {
+        background-color: #f8fbf9;
+        border-radius: 10px;
+        padding: 6px;
+    }
+
+    /* ========================================
+       STATUS
+       ======================================== */
+
+    [data-testid="stStatusWidget"] {
+        border-radius: 10px;
+        border: 1px solid #c9ddd0;
+    }
+
+    /* ========================================
+       DIVIDERS
+       ======================================== */
+
+    hr {
+        border-color: #d4e3d8;
+    }
+
+    /* ========================================
+       FOOTER
+       ======================================== */
+
+    .conceptforge-footer {
+        text-align: center;
+
+        color: #81958a;
+
+        font-size: 0.75rem;
+
+        padding: 25px 0 10px 0;
+    }
+
     </style>
     """,
     unsafe_allow_html=True,
 )
 
+
 # ============================================
-# SESSION STATE INITIALIZATION
+# INITIALIZE RAG ENGINE
 # ============================================
 
-if "agent" not in st.session_state:
-    st.session_state.agent = None
+@st.cache_resource
+def initialize_rag():
+    """
+    Initialize the persistent RAG engine.
 
-if "rag_engine" not in st.session_state:
-    st.session_state.rag_engine = None
+    The RAG engine automatically restores the existing
+    ChromaDB index and active document.
+    """
+    return RAGEngine()
+
+
+rag_engine = initialize_rag()
+
+
+# Share the same RAG engine instance with MCP.
+set_rag_engine(rag_engine)
+
+
+# ============================================
+# INITIALIZE AGENT
+# ============================================
+
+@st.cache_resource
+def initialize_agent():
+    """
+    Initialize the ConceptForge agent.
+
+    MCP tool discovery is asynchronous.
+    """
+    return asyncio.run(get_agent())
+
+
+# ============================================
+# SESSION STATE
+# ============================================
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 if "thread_id" not in st.session_state:
-    st.session_state.thread_id = "1"
+    st.session_state.thread_id = "streamlit-user"
 
-if "document_loaded" not in st.session_state:
-    st.session_state.document_loaded = False
+if "agent" not in st.session_state:
+    st.session_state.agent = None
 
-if "current_document" not in st.session_state:
-    st.session_state.current_document = None
+if "last_uploaded_file" not in st.session_state:
+    st.session_state.last_uploaded_file = None
 
 
 # ============================================
-# HELPER FUNCTIONS
+# HEADER
 # ============================================
 
-def get_agent_instance():
-    """Get or create the agent instance."""
-    if st.session_state.agent is None:
-        with st.spinner("🔄 Initializing ConceptForge agent..."):
-            st.session_state.agent = get_agent()
-    return st.session_state.agent
+st.markdown(
+    """
+    <div class="conceptforge-header">
+        <div class="conceptforge-title">
+            🔬 ConceptForge
+        </div>
+        <div class="conceptforge-subtitle">
+            Intelligent Research Assistant for document analysis
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
+# ============================================
+# CAPABILITIES
+# ============================================
 
-def get_rag_instance():
-    """Get or create the RAG engine instance."""
-    if st.session_state.rag_engine is None:
-        st.session_state.rag_engine = RAGEngine()
-    return st.session_state.rag_engine
+st.markdown("### What can ConceptForge do?")
 
+col1, col2, col3 = st.columns(3)
 
-def load_document(file_path: str) -> bool:
-    """Load a document using the RAG engine and share it with MCP."""
-    try:
-        rag = get_rag_instance()
-        rag.load_pdf_and_index(file_path)
-        st.session_state.document_loaded = True
-        st.session_state.current_document = os.path.basename(file_path)
-        from src.mcp_server import set_rag_engine
-        set_rag_engine(rag)
-        return True
-    except Exception as e:
-        st.error(f"❌ Error loading document: {e}")
-        return False
+with col1:
+    st.markdown(
+        """
+        **📄 Summarize documents**
 
+        Get a concise overview of the active document.
+        """
+    )
 
-async def handle_chat(prompt: str):
-    """Process a chat message and generate a response."""
-    try:
-        agent = get_agent_instance()
-        config = {"configurable": {"thread_id": st.session_state.thread_id}}
-        
-        response = await agent.ainvoke(
-            {"messages": [HumanMessage(content=prompt)]},
-            config=config
-        )
-        
-        # Extract the response
-        last_message = response['messages'][-1]
-        if isinstance(last_message.content, list):
-            answer = last_message.content[0].get('text', str(last_message.content))
-        else:
-            answer = last_message.content
-        
-        return answer
-    except Exception as e:
-        return f"❌ Error: {str(e)}"
+with col2:
+    st.markdown(
+        """
+        **🔎 Search documents**
 
+        Find specific information using semantic search.
+        """
+    )
 
-def clear_conversation():
-    """Clear the conversation history."""
-    st.session_state.messages = []
-    st.session_state.thread_id = str(int(st.session_state.thread_id) + 1)
+with col3:
+    st.markdown(
+        """
+        **🧠 Generate concept maps**
 
+        Visualize key concepts and their relationships.
+        """
+    )
+
+st.divider()
 
 # ============================================
 # SIDEBAR
 # ============================================
 
 with st.sidebar:
-    st.image("https://img.icons8.com/fluency/96/microscope.png", width=80)
-    st.markdown("## ⚙️ ConceptForge")
-    st.markdown("*Intelligent Research Assistant*")
+
+    st.header("📚 Documents")
+
+    documents = rag_engine.get_indexed_documents()
+    active_document = rag_engine.get_active_document()
+
+    # ----------------------------------------
+    # CURRENT DOCUMENT
+    # ----------------------------------------
+
+    if active_document:
+
+        st.markdown(
+            "## Active document"
+        )
+
+        st.info(
+            f"📄 {active_document}"
+        )
+        
+    # ----------------------------------------
+    # INDEXED DOCUMENTS
+    # ----------------------------------------
+
+    if documents:
+
+        st.caption("Indexed documents")
+
+        for document in documents:
+
+            if document == active_document:
+
+                st.markdown(
+                    f"""
+                    <div class="document-item document-active">
+                        ● {document}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            else:
+
+                st.markdown(
+                    f"""
+                    <div class="document-item">
+                        ○ {document}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+    else:
+
+        st.info(
+            "No documents indexed yet."
+        )
+
     st.divider()
-    
-    # Document Upload
-    st.markdown("### 📄 Document Management")
-    
-uploaded_file = st.file_uploader(
-    "Upload a PDF document",
-    type=["pdf"],
-    help="Upload a PDF to analyze and query",
-    key="file_uploader"
+
+    # ========================================
+    # DOCUMENT UPLOAD
+    # ========================================
+
+    st.subheader("Add document")
+
+    uploaded_file = st.file_uploader(
+        "Upload a PDF",
+        type=["pdf"],
+        key="pdf_uploader",
+    )
+
+    if uploaded_file is not None:
+
+        # Prevent repeated indexing after reruns.
+        if (
+            st.session_state.last_uploaded_file
+            != uploaded_file.name
+        ):
+
+            upload_dir = PROJECT_ROOT / "uploads"
+            upload_dir.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            file_path = upload_dir / uploaded_file.name
+
+            try:
+
+                with open(file_path, "wb") as f:
+                    f.write(
+                        uploaded_file.getbuffer()
+                    )
+
+                with st.spinner(
+                    "Indexing document..."
+                ):
+
+                    rag_engine.load_pdf_and_index(
+                        str(file_path)
+                    )
+
+                st.session_state.last_uploaded_file = (
+                    uploaded_file.name
+                )
+
+                st.success(
+                    f"Loaded: {uploaded_file.name}"
+                )
+
+                st.rerun()
+
+            except Exception as e:
+
+                st.error(
+                    f"Error loading document: {e}"
+                )
+
+    # ========================================
+    # ACTIVE DOCUMENT SELECTOR
+    # ========================================
+
+    documents = rag_engine.get_indexed_documents()
+    active_document = rag_engine.get_active_document()
+
+    if documents:
+
+        st.subheader("Select document")
+
+        selected_document = st.selectbox(
+            "Active document",
+            documents,
+            index=(
+                documents.index(active_document)
+                if active_document in documents
+                else 0
+            ),
+            label_visibility="collapsed",
+        )
+
+        if st.button(
+            "Set as active",
+            use_container_width=True,
+        ):
+
+            if rag_engine.set_active_document(
+                selected_document
+            ):
+
+                # Make sure MCP uses the same instance.
+                set_rag_engine(rag_engine)
+
+                st.success(
+                    f"Active document changed to:\n"
+                    f"{selected_document}"
+                )
+
+                st.rerun()
+
+            else:
+
+                st.error(
+                    "Could not change active document."
+                )
+
+
+# ============================================
+# CREATE AGENT
+# ============================================
+
+if st.session_state.agent is None:
+
+    try:
+
+        st.session_state.agent = initialize_agent()
+
+    except Exception as e:
+
+        st.error(
+            f"Could not initialize ConceptForge agent: {e}"
+        )
+
+        st.stop()
+
+
+agent = st.session_state.agent
+
+
+# ============================================
+# DISPLAY CHAT HISTORY
+# ============================================
+
+for message in st.session_state.messages:
+
+    with st.chat_message(
+        message["role"]
+    ):
+
+        st.markdown(
+            message["content"]
+        )
+
+
+# ============================================
+# ASYNC AGENT EXECUTION
+# ============================================
+
+async def run_agent(user_message: str):
+    """
+    Send a user message to the ConceptForge agent.
+
+    MCP tools are asynchronous, so the agent is invoked
+    using ainvoke().
+    """
+
+    response = await agent.ainvoke(
+        {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": user_message,
+                }
+            ]
+        },
+        config={
+            "configurable": {
+                "thread_id": (
+                    st.session_state.thread_id
+                )
+            }
+        },
+    )
+
+    return response
+
+
+# ============================================
+# CHAT INPUT
+# ============================================
+
+user_input = st.chat_input(
+    "Ask something about the active document..."
 )
 
-if uploaded_file is not None:
-    os.makedirs("uploads", exist_ok=True)
-    file_path = os.path.join("uploads", uploaded_file.name)
-    with open(file_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
-    
-    if load_document(file_path):
-        st.success(f"✅ Document loaded: {uploaded_file.name}")
-        st.session_state.document_loaded = True
-        st.session_state.current_document = uploaded_file.name
-        
-        with st.spinner("🔄 Indexando en el servidor MCP..."):
-            agent = get_agent_instance()
-            config = {"configurable": {"thread_id": st.session_state.thread_id}}
-            
-            load_message = f"Please load the document from the path: {file_path} using the load_document tool. Do not ask for confirmation, just load it."
-            
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                response = loop.run_until_complete(
-                    agent.ainvoke(
-                        {"messages": [HumanMessage(content=load_message)]},
-                        config=config
-                    )
-                )
-                last_msg = response['messages'][-1]
-                if isinstance(last_msg.content, list):
-                    answer = last_msg.content[0].get('text', '')
-                else:
-                    answer = last_msg.content
-                st.info(f"📡 MCP Server: {answer}")
-            except Exception as e:
-                st.error(f"❌ Error al cargar en MCP: {e}")
-            finally:
-                loop.close()
-                asyncio.set_event_loop(None)
-    else:
-        st.error("❌ Failed to load document")
-    
-    # Document status
-    if st.session_state.document_loaded:
-        st.markdown("---")
-        st.markdown("### 📊 Document Status")
-        st.markdown(f"**File:** {st.session_state.current_document}")
-        
-        rag = get_rag_instance()
-        if rag.vector_store:
-            st.success("✅ Vector store ready")
-            st.info(f"📄 Chunks: {len(rag.documents) if rag.documents else 0}")
-    
-    st.divider()
-    # --- Help Menu (NEW) ---
-    st.markdown("### 📚 Commands Help")
-    with st.expander("💬 Available commands"):
-        st.markdown("""
-        **Ask about your document:**
-        
-        - `resume el documento` — Get a detailed summary
-        - `genera un mapa conceptual` — Generate a concept map
-        - `busca información sobre [tema]` — Search for specific info
-        - `¿De qué trata este documento?` — General overview
-        
-        **In English:**
-        - `summarize the document`
-        - `generate a concept map`
-        - `search for [topic]`
-        """)
-    st.divider()
 
-    # Controls
-    st.markdown("### 🎛️ Controls")
-    if st.button("🗑️ Clear Conversation", use_container_width=True):
-        clear_conversation()
-        st.rerun()
-    
-    st.divider()
-    
-    # Information
-    with st.expander("ℹ️ About ConceptForge"):
-        st.markdown("""
-        **ConceptForge** is an intelligent research assistant that uses:
-        
-        - **RAG** for semantic search
-        - **MCP** for tool integration
-        - **LangChain** for agent orchestration
-        - **Gemini** for LLM capabilities
-        
-        **Features:**
-        - Semantic document search
-        - Automatic summarization
-        - Concept map generation
-        - Multi-turn conversation
-        """)
+if user_input:
 
+    # ----------------------------------------
+    # SAVE USER MESSAGE
+    # ----------------------------------------
 
-# ============================================
-# MAIN CHAT INTERFACE
-# ============================================
+    st.session_state.messages.append(
+        {
+            "role": "user",
+            "content": user_input,
+        }
+    )
 
-# Header
-st.markdown('<p class="main-header">⚙️ ConceptForge</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Upload a document and start exploring its content</p>', unsafe_allow_html=True)
+    # ----------------------------------------
+    # DISPLAY USER MESSAGE
+    # ----------------------------------------
 
-with st.expander("💡 What can I do with ConceptForge?", expanded=True):
-    st.markdown("""
-    **Suggested commands:**
-    
-    - 📝 **Summarize document**
-    - 🧠 **Concept map generation**
-    - 🔍 **Topic search**
-    """)
-
-# Status indicator
-if st.session_state.document_loaded:
-    st.info(f"📄 Document loaded: **{st.session_state.current_document}**")
-else:
-    st.warning("📄 No document loaded. Upload a PDF to start analyzing.")
-
-# Chat History
-chat_container = st.container()
-
-with chat_container:
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-# Chat Input
-if prompt := st.chat_input("Ask a question about your document..."):
-    # Add user message to history
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    
     with st.chat_message("user"):
-        st.markdown(prompt)
-    
-    # Check if a document is loaded
-    if not st.session_state.document_loaded:
-        with st.chat_message("assistant"):
-            error_msg = "⚠️ Please upload a document first before asking questions."
-            st.markdown(error_msg)
-            st.session_state.messages.append({"role": "assistant", "content": error_msg})
-    else:
-        # Generate response
-        with st.chat_message("assistant"):
-            with st.spinner("🧠 Thinking..."):
-                try:
-                    agent = get_agent_instance()
-                    config = {"configurable": {"thread_id": st.session_state.thread_id}}
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    try:
-                        response = loop.run_until_complete(
-                            agent.ainvoke(
-                                {"messages": [HumanMessage(content=prompt)]},
-                                config=config
-                            )
-                        )
-                    finally:
-                        loop.close()
-                        asyncio.set_event_loop(None)
-                    
-                    # Extraer la respuesta
-                    last_message = response['messages'][-1]
-                    if isinstance(last_message.content, list):
-                        answer = last_message.content[0].get('text', str(last_message.content))
-                    else:
-                        answer = last_message.content
-                    
-                    st.markdown(answer)
-                    st.session_state.messages.append({"role": "assistant", "content": answer})
-                    
-                except Exception as e:
-                    error_msg = f"❌ Error: {str(e)}"
-                    st.markdown(error_msg)
-                    st.session_state.messages.append({"role": "assistant", "content": error_msg})
 
+        st.markdown(user_input)
+
+    # ----------------------------------------
+    # AGENT RESPONSE
+    # ----------------------------------------
+
+    with st.chat_message("assistant"):
+
+        try:
+
+            with st.status(
+                "🔬 ConceptForge is working...",
+                expanded=True,
+            ) as status:
+
+                st.write(
+                    "Connecting to the research agent..."
+                )
+
+                st.write(
+                    f"Analyzing: "
+                    f"{rag_engine.get_active_document()}"
+                )
+
+                st.write(
+                    "Searching the indexed document..."
+                )
+
+                result = asyncio.run(
+                    run_agent(user_input)
+                )
+
+                status.update(
+                    label="✓ Analysis complete",
+                    state="complete",
+                    expanded=False,
+                )
+
+            # --------------------------------
+            # EXTRACT ASSISTANT RESPONSE
+            # --------------------------------
+
+            messages = result.get(
+                "messages",
+                []
+            )
+
+            assistant_message = None
+
+            for message in reversed(messages):
+
+                if getattr(
+                    message,
+                    "type",
+                    None
+                ) != "ai":
+
+                    continue
+
+                content = getattr(
+                    message,
+                    "content",
+                    None
+                )
+
+                if not content:
+                    continue
+
+                # Gemini may return content as a
+                # list of structured blocks.
+                if isinstance(content, list):
+
+                    text_parts = []
+
+                    for block in content:
+
+                        if isinstance(
+                            block,
+                            dict
+                        ):
+
+                            if (
+                                block.get("type")
+                                == "text"
+                            ):
+
+                                text = block.get(
+                                    "text",
+                                    ""
+                                )
+
+                                if text:
+                                    text_parts.append(
+                                        text
+                                    )
+
+                        elif isinstance(
+                            block,
+                            str
+                        ):
+
+                            text_parts.append(
+                                block
+                            )
+
+                    content = "\n".join(
+                        text_parts
+                    )
+
+                assistant_message = str(
+                    content
+                )
+
+                if assistant_message.strip():
+                    break
+
+            # --------------------------------
+            # FALLBACK
+            # --------------------------------
+
+            if not assistant_message:
+
+                assistant_message = (
+                    "The agent did not return "
+                    "a response."
+                )
+
+            # --------------------------------
+            # DISPLAY RESPONSE
+            # --------------------------------
+
+            st.markdown(
+                assistant_message
+            )
+
+            # --------------------------------
+            # SAVE RESPONSE
+            # --------------------------------
+
+            st.session_state.messages.append(
+                {
+                    "role": "assistant",
+                    "content": assistant_message,
+                }
+            )
+
+        except Exception as e:
+
+            error_message = (
+                f"Error communicating with the agent: {e}"
+            )
+
+            st.error(
+                error_message
+            )
+
+            st.session_state.messages.append(
+                {
+                    "role": "assistant",
+                    "content": error_message,
+                }
+            )
+
+
+# ============================================
+# FOOTER
+# ============================================
+
+st.markdown(
+    """
+    <div class="conceptforge-footer">
+        ConceptForge · Intelligent document analysis
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
